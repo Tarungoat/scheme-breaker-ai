@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { NextResponse } from "next/server";
-import { getSupabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase/server";
 
 // OpenRouter client using OpenAI-compatible SDK
 const openrouter = new OpenAI({

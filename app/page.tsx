@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
+import Link from "next/link";
 
 interface GradeResult {
   breakdown: string;
@@ -209,6 +210,11 @@ export default function Home() {
       </div>
 
       <div className="max-w-4xl mx-auto px-6 py-16 sm:py-24 space-y-12">
+        <div className="flex justify-end gap-4 w-full px-6">
+          <Link href="/login" className="text-slate-300 hover:text-white px-4 py-2 font-medium transition-colors">Log In</Link>
+          <Link href="/signup" className="bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30 border border-emerald-500/50 px-4 py-2 rounded-lg font-medium transition-colors">Sign Up</Link>
+        </div>
+
         {/* ── Header ── */}
         <header className="text-center space-y-5">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10 text-emerald-400 text-sm font-medium">
