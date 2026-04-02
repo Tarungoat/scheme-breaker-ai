@@ -14,9 +14,8 @@ export default function AnalysePage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{
     current_level: number;
-    level_descriptor_hit: string;
-    level_descriptor_missing: string;
-    three_edits: string[];
+    missing_elements: string;
+    "3_specific_fixes": string[];
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -72,8 +71,8 @@ export default function AnalysePage() {
       }
 
       setResult(data.result);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -92,7 +91,7 @@ export default function AnalysePage() {
           </p>
         </div>
 
-        <form onSubmit={handleAnalyse} className="grid md:grid-cols-2 gap-8 bg-neutral-900/50 backdrop-blur-xl border border-neutral-800 rounded-3xl p-8 shadow-2xl">
+        <form onSubmit={handleAnalyse} className="grid md:grid-cols-2 gap-8 bg-[#111] border border-neutral-800 p-8 shadow-2xl rounded-none">
           
           {/* Left Col: Params */}
           <div className="space-y-6">
@@ -105,7 +104,7 @@ export default function AnalysePage() {
               <select 
                 value={board} 
                 onChange={(e) => setBoard(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 text-white rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition duration-200"
+                className="w-full bg-black border border-neutral-800 text-white p-3 focus:outline-none focus:ring-2 focus:ring-[#00b4d8] rounded-none transition duration-200"
               >
                 <option value="AQA">AQA</option>
                 <option value="CIE">CIE</option>
@@ -120,7 +119,7 @@ export default function AnalysePage() {
               <select 
                 value={paper} 
                 onChange={(e) => setPaper(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 text-white rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition duration-200"
+                className="w-full bg-black border border-neutral-800 text-white p-3 focus:outline-none focus:ring-2 focus:ring-[#00b4d8] rounded-none transition duration-200"
               >
                 <option value="English Language Paper 1">English Language Paper 1</option>
                 <option value="English Language Paper 2">English Language Paper 2</option>
@@ -132,7 +131,7 @@ export default function AnalysePage() {
               <select 
                 value={question} 
                 onChange={(e) => setQuestion(e.target.value)}
-                className="w-full bg-neutral-950 border border-neutral-800 text-white rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition duration-200"
+                className="w-full bg-black border border-neutral-800 text-white p-3 focus:outline-none focus:ring-2 focus:ring-[#00b4d8] rounded-none transition duration-200"
               >
                 {['Q1', 'Q2', 'Q3', 'Q4', 'Q5'].map(q => (
                   <option key={q} value={q}>{q}</option>
@@ -149,39 +148,39 @@ export default function AnalysePage() {
             
             {!file ? (
               <div 
-                className="flex-1 border-2 border-dashed border-neutral-700 hover:border-emerald-500/50 rounded-2xl bg-neutral-950/50 flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all duration-300 group"
+                className="flex-1 border-2 border-dashed border-neutral-700 hover:border-[#00b4d8] bg-[#0a0a0a] flex flex-col items-center justify-center p-8 text-center cursor-pointer transition-all duration-300 group rounded-none"
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className="w-16 h-16 rounded-full bg-neutral-900 group-hover:bg-emerald-900/30 flex items-center justify-center mb-4 transition-colors">
-                  <UploadCloud className="w-8 h-8 text-neutral-400 group-hover:text-emerald-400" />
+                <div className="w-16 h-16 bg-[#111] group-hover:bg-[#00b4d8]/10 flex items-center justify-center mb-4 transition-colors rounded-none">
+                  <UploadCloud className="w-8 h-8 text-neutral-400 group-hover:text-[#00b4d8]" />
                 </div>
                 <p className="text-sm text-neutral-300 font-medium">Click to upload Image or PDF</p>
                 <p className="text-xs text-neutral-600 mt-2">Max file size 10MB</p>
               </div>
             ) : (
-              <div className="flex-1 bg-neutral-950 border border-neutral-800 rounded-2xl p-4 flex flex-col relative overflow-hidden group">
+              <div className="flex-1 bg-[#111] border border-neutral-800 p-4 flex flex-col relative overflow-hidden group rounded-none">
                 <button 
                   type="button"
                   onClick={clearFile}
-                  className="absolute top-3 right-3 p-1.5 bg-red-500/10 text-red-400 rounded-full hover:bg-red-500/20 transition-colors z-10"
+                  className="absolute top-3 right-3 p-1.5 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition-colors z-10 rounded-none"
                 >
                   <XCircle className="w-5 h-5" />
                 </button>
                 
                 {previewUrl ? (
-                  <div className="relative w-full h-40 rounded-xl overflow-hidden mb-4 border border-neutral-800">
+                  <div className="relative w-full h-40 overflow-hidden mb-4 border border-neutral-800 rounded-none">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                   </div>
                 ) : (
-                  <div className="w-full h-40 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center mb-4">
+                  <div className="w-full h-40 bg-[#0a0a0a] border border-neutral-800 flex items-center justify-center mb-4 rounded-none">
                     <FileImage className="w-12 h-12 text-neutral-600" />
                   </div>
                 )}
                 
                 <div className="flex items-center space-x-3 mt-auto">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+                  <div className="w-10 h-10 bg-[#00b4d8]/10 flex items-center justify-center flex-shrink-0 rounded-none">
+                    <CheckCircle2 className="w-5 h-5 text-[#00b4d8]" />
                   </div>
                   <div className="truncate">
                     <p className="text-sm font-medium text-white truncate">{file.name}</p>
@@ -202,7 +201,7 @@ export default function AnalysePage() {
             <button 
               type="submit" 
               disabled={loading || !file}
-              className="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 to-green-500 hover:from-emerald-500 hover:to-green-400 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              className="w-full py-4 px-6 bg-[#00b4d8] hover:bg-[#0096b8] text-white font-bold shadow-lg shadow-[#00b4d8]/20 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center rounded-none"
             >
               {loading ? (
                 <>
@@ -228,15 +227,15 @@ export default function AnalysePage() {
 
         {/* Success Results Card */}
         {result && (
-          <div className="bg-neutral-900/80 backdrop-blur-xl border border-neutral-800 rounded-3xl p-8 md:p-10 shadow-2xl animate-in fade-in slide-in-from-bottom-8">
+          <div className="bg-[#111] border border-neutral-800 p-8 md:p-10 shadow-2xl animate-in fade-in slide-in-from-bottom-8 rounded-none">
             <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-neutral-800 pb-8 mb-8">
               <div>
                 <h2 className="text-3xl font-extrabold text-white mb-2">Analysis Complete</h2>
                 <p className="text-neutral-400">{board} {paper} - {question}</p>
               </div>
               
-              <div className="mt-6 md:mt-0 bg-neutral-950 border border-neutral-800 rounded-2xl px-6 py-4 flex items-center">
-                <Award className="w-10 h-10 text-emerald-400 mr-4" />
+              <div className="mt-6 md:mt-0 bg-[#0a0a0a] border border-neutral-800 px-6 py-4 flex items-center rounded-none">
+                <Award className="w-10 h-10 text-[#00b4d8] mr-4" />
                 <div>
                   <p className="text-xs text-neutral-500 font-bold uppercase tracking-wider">Current Level</p>
                   <p className="text-3xl font-black text-white">Level {result.current_level}</p>
@@ -244,37 +243,27 @@ export default function AnalysePage() {
               </div>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-8 mb-10">
-              <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-6">
-                <div className="flex items-center mb-4">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-400 mr-3" />
-                  <h3 className="text-lg font-bold text-white">What You're Hitting</h3>
-                </div>
-                <p className="text-neutral-300 leading-relaxed">
-                  {result.level_descriptor_hit}
-                </p>
-              </div>
-
-              <div className="bg-orange-500/5 border border-orange-500/10 rounded-2xl p-6">
+            <div className="grid md:grid-cols-1 gap-8 mb-10">
+              <div className="bg-orange-500/5 border border-orange-500/10 p-6 rounded-none">
                 <div className="flex items-center mb-4">
                   <AlertCircle className="w-6 h-6 text-orange-400 mr-3" />
-                  <h3 className="text-lg font-bold text-white">What's Blocking the Next Level</h3>
+                  <h3 className="text-lg font-bold text-white">What&apos;s Missing</h3>
                 </div>
                 <p className="text-neutral-300 leading-relaxed">
-                  {result.level_descriptor_missing}
+                  {result.missing_elements}
                 </p>
               </div>
             </div>
 
             <div className="space-y-6">
               <h3 className="text-xl font-bold flex items-center text-white border-b border-neutral-800 pb-4">
-                <RefreshCw className="w-6 h-6 text-emerald-400 mr-3" /> Actionable Fixes (Three Edits)
+                <RefreshCw className="w-6 h-6 text-[#00b4d8] mr-3" /> Actionable Fixes
               </h3>
               
               <div className="space-y-4">
-                {result.three_edits.map((edit, idx) => (
-                  <div key={idx} className="flex bg-neutral-950 border border-neutral-800 rounded-xl p-5 hover:border-neutral-700 transition-colors">
-                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 font-black flex items-center justify-center mr-4 flex-shrink-0">
+                {result["3_specific_fixes"].map((edit, idx) => (
+                  <div key={idx} className="flex bg-[#0a0a0a] border border-neutral-800 p-5 hover:border-neutral-700 transition-colors rounded-none">
+                    <div className="w-8 h-8 bg-[#00b4d8]/20 text-[#00b4d8] font-black flex items-center justify-center mr-4 flex-shrink-0 rounded-none">
                       {idx + 1}
                     </div>
                     <p className="text-neutral-200 mt-1">{edit}</p>

@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
     if (currentAnalyses >= 3) {
       return NextResponse.json(
         { error: "You've hit your daily limit of 3 analyses." },
-        { status: 429 }
+        { status: 403 }
       );
     }
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
         messages: [
           {
             role: "system",
-            content: "You are an expert GCSE English examiner. The student will upload a handwritten essay answer. Apply the official AQA/relevant board level descriptor grid. Return ONLY valid JSON with these fields: current_level (number 1-4), level_descriptor_hit (string), level_descriptor_missing (string), three_edits (array of 3 strings). No other text."
+            content: "You are an expert GCSE English examiner. The student will upload a handwritten essay answer. Apply the official AQA/relevant board level descriptor grid. Return ONLY valid JSON with these exact keys: current_level (number), missing_elements (string), and 3_specific_fixes (array of 3 strings). No other text."
           },
           {
             role: "user",

@@ -16,3 +16,7 @@ During the QA and testing phase, the following issues were discovered and system
 4. **Missing Navigational CTAs:**
    - **Bug:** The landing page (`/`) had no explicit way for new users to navigate to `/signup` or `/login`.
    - **Fix:** Inserted intuitive and styled login/signup routes at the top of the landing page UI for clearer user-flow conversion.
+
+## Phase 2: Core Analysis Dashboard and Mistral API
+- Autonomously implemented the `analyse` upload dashboard featuring drag-and-drop zones, exam parameter selection, and elite brutalist aesthetics (sharp corners, dark theme `#0A0A0A`, and teal `#00b4d8` accents).
+- Configured the API route `api/analyse/route.ts` to strictly authenticate users via Supabase, enforce daily usage limits (max 3 analyses per day, returning HTTP 403 on limit exhaustion), and execute `pixtral-12b-2409` vision modeling logic with structured JSON evaluation formats.
