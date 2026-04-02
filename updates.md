@@ -17,12 +17,15 @@ During the QA and testing phase, the following issues were discovered and system
    - **Bug:** The landing page (`/`) had no explicit way for new users to navigate to `/signup` or `/login`.
    - **Fix:** Inserted intuitive and styled login/signup routes at the top of the landing page UI for clearer user-flow conversion.
 
-## Phase 2: Core Analysis Dashboard and Mistral API
-- Autonomously implemented the `analyse` upload dashboard featuring drag-and-drop zones, exam parameter selection, and elite brutalist aesthetics (sharp corners, dark theme `#0A0A0A`, and teal `#00b4d8` accents).
-- Configured the API route `api/analyse/route.ts` to strictly authenticate users via Supabase, enforce daily usage limits (max 3 analyses per day, returning HTTP 403 on limit exhaustion), and execute `pixtral-12b-2409` vision modeling logic with structured JSON evaluation formats.
+# Phase 1: Landing Page Overhaul
 
-## Phase 2: Backend, Auth, and Supabase RLS
-- Verified/Created the `analyses` and `usage_limits` tables in Supabase with exact schema definitions.
-- Enabled Row Level Security (RLS) on both tables ensuring row permissions are strictly checked against `auth.uid() = user_id`.
-- Verified `lib/supabase/client.ts` and `lib/supabase/server.ts` utilizing standard Next.js App Router patterns via `@supabase/ssr`.
-- Verified `middleware.ts` enforces authentication across all `/dashboard/*` routes, redirecting unauthenticated users to `/login`.
+1. **Tailwind Configurations:**
+   - Addressed missing configuration context by generating a formal `tailwind.config.ts` enforcing the global #0a0a0a color structure.
+2. **Brutalist Aesthetic Implementation:**
+   - Completely rewrote `app/page.tsx` transitioning away from the immediate application UI to a true B2C landing page.
+   - Established the requested brutalist visual language: sharp corners (`rounded-none`), heavy grid lines, electric blue (`#00b4d8`) actions against a pitch-dark `#0a0a0a` background.
+   - Extirpated any soft corners, AI blobs, and gradients as requested.
+3. **Core Page Elements:**
+   - Configured high-conversion CTA's routing visitors to the `/signup` process.
+   - Replicated requested sections: Impactful Hero, Social Proof Statistics, Procedural 'How it works' visual Bento Grid, Unapologetic Kanban Pricing structure, and authoritative Footer matching requested criteria.
+   - Installed `framer-motion` to accomplish subtle entry fades.
