@@ -29,3 +29,20 @@ During the QA and testing phase, the following issues were discovered and system
    - Configured high-conversion CTA's routing visitors to the `/signup` process.
    - Replicated requested sections: Impactful Hero, Social Proof Statistics, Procedural 'How it works' visual Bento Grid, Unapologetic Kanban Pricing structure, and authoritative Footer matching requested criteria.
    - Installed `framer-motion` to accomplish subtle entry fades.
+
+# Phase 2 & 3: Auth Refinements & Core Analysis Pipeline
+
+1. **Auth Loop Fix:**
+   - Modified `proxy.ts` (Next.js 16.2.2 middleware equivalent) and Auth forms (`/login`, `/signup`) to correctly redirect to `/dashboard/analyse` on successful authentication, eliminating the previous infinite redirect loop.
+2. **Dashboard UI Finalized:**
+   - Evaluated `app/dashboard/analyse/page.tsx`. Verified that the UI successfully renders a polished response state indicating Current Level, Missing Elements, and Actionable Fixes.
+3. **AI Engine & API Secured:**
+   - Secured `app/api/analyse/route.ts` backing off to `pixtral-12b-2409` correctly.
+   - Enforced database transactions validating user session via `user.id`.
+4. **Supabase Schema Structure:**
+   - **`analyses` table:** Maps `id`, `user_id`, `exam_board`, `paper`, `question`, `result` (JSONB) and timestamp.
+   - **`usage_limits` table:** Maps `user_id` and tracks `analyses_today` to limit API costs securely.
+
+# Phase 4: Final QA
+- Ensured zero Hydration or TypeScript Server Component build errors (`npm run build` returned cleanly).
+- Migrated deprecated `middleware.ts` to `proxy.ts` strictly following Next.js 16.2.2 guidelines.
