@@ -43,6 +43,20 @@ During the QA and testing phase, the following issues were discovered and system
    - **`analyses` table:** Maps `id`, `user_id`, `exam_board`, `paper`, `question`, `result` (JSONB) and timestamp.
    - **`usage_limits` table:** Maps `user_id` and tracks `analyses_today` to limit API costs securely.
 
-# Phase 4: Final QA
-- Ensured zero Hydration or TypeScript Server Component build errors (`npm run build` returned cleanly).
-- Migrated deprecated `middleware.ts` to `proxy.ts` strictly following Next.js 16.2.2 guidelines.
+# Phase 5: MVP Completion & AI Calibrations
+
+1. **Gemini Vision Integration:**
+   - Switched from Mistral to **Gemini 1.5 Flash** for superior handwriting recognition and faster turnaround.
+   - Fixed the "Failed to upload image" bug by converting the multipart file to a Base64 `inline_data` buffer directly for the Gemini SDK.
+   - Calibrated the examiner prompt with high-fidelity Mark Schemes for AQA English Language (Q1-Q5).
+2. **Auth & UX Refinements:**
+   - Disabled the "Success! Check Email" gate for signup since email confirmation is manually disabled in Supabase, enabling immediate dashboard access.
+   - Upgraded the Middleware to explicitly allow public access to `/api/*` routes, ensuring zero-latency analysis.
+3. **Dashboard Enhancements:**
+   - Redesigned the root `/dashboard` with a personalized welcome message and a high-visibility Quota tracker.
+   - Connected Historical Artifacts directly to the Supabase `analyses` table with graceful error handling.
+
+# Phase 6: Final Compliance
+- **Structural Optimization:** Migrated `middleware.ts` to `proxy.ts` as per Next.js 16.2.2 conventions.
+- **QC:** Ensured 0 TypeScript errors and clean ESLint reports on all core application files.
+- **Release:** Final push to `master` branch with all features operational.
