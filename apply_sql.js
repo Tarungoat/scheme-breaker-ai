@@ -3,48 +3,45 @@ const { spawn } = require("child_process");
 const os = require("os");
 
 const sql = `
--- Create analyses table
-CREATE TABLE IF NOT EXISTS analyses (
+-- Create storage bucket if not exists
+INSERT INTO storage.buckets (id, name, public) VALUES ('essay_uploads', 'essay_uploads', true) ON CONFLICT (id) DO NOTHING;
+
+-- Drop and recreate analyses table
+DROP TABLE IF EXISTS analyses CASCADE;
+
+CREATE TABLE analyses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  essay_text TEXT,
   image_url TEXT,
   exam_board TEXT,
   paper TEXT,
-  question_number TEXT,
-  level_score INT,
-  feedback_json JSONB,
-  tokens_used INT
+  question TEXT,
+  ai_feedback JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Create usage_limits table
-CREATE TABLE IF NOT EXISTS usage_limits (
-  user_id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  analyses_today INT DEFAULT 0,
-  last_reset_date DATE DEFAULT CURRENT_DATE
-);
-
--- Enable RLS
+-- Enable RLS logic
 ALTER TABLE analyses ENABLE ROW LEVEL SECURITY;
-ALTER TABLE usage_limits ENABLE ROW LEVEL SECURITY;
-
--- Create Policies
--- Note: DROP POLICY first to ensure idempotency when rerunning
-DO $$ BEGIN
-  DROP POLICY IF EXISTS "Users can manage their own analyses" ON analyses;
-  DROP POLICY IF EXISTS "Users can manage their own usage limits" ON usage_limits;
-END $$;
 
 CREATE POLICY "Users can manage their own analyses" 
 ON analyses FOR ALL 
 USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can manage their own usage limits"
-ON usage_limits FOR ALL
-USING (auth.uid() = user_id)
-WITH CHECK (auth.uid() = user_id);
+-- Storage policies
+DO $$ BEGIN
+  DROP POLICY IF EXISTS "Public access" ON storage.objects;
+  DROP POLICY IF EXISTS "Auth upload" ON storage.objects;
+EXCEPTION WHEN OTHERS THEN
+END $$;
+
+CREATE POLICY "Public access"
+ON storage.objects FOR SELECT
+USING (bucket_id = 'essay_uploads');
+
+CREATE POLICY "Auth upload"
+ON storage.objects FOR INSERT
+WITH CHECK (bucket_id = 'essay_uploads' AND auth.role() = 'authenticated');
 `;
 
 const cmd = os.platform() === "win32" ? "npx.cmd" : "npx";
