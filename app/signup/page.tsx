@@ -9,6 +9,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
@@ -17,8 +18,9 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setSuccess(false);
 
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -29,9 +31,12 @@ export default function SignupPage() {
     if (error) {
       setError(error.message);
       setLoading(false);
-    } else {
+    } else if (data.session) {
       router.push('/dashboard/analyse');
       router.refresh();
+    } else {
+      setSuccess(true);
+      setLoading(false);
     }
   };
 
@@ -78,12 +83,18 @@ export default function SignupPage() {
             </div>
           )}
 
+          {success && (
+            <div className="p-4 bg-[#00b4d8]/10 border border-[#00b4d8]/30 text-[#00b4d8] text-xs font-bold uppercase tracking-wider rounded-none">
+              Success! Please check your email to confirm your account.
+            </div>
+          )}
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || success}
             className="w-full flex justify-center py-5 bg-[#00b4d8] text-[#0a0a0a] font-black text-lg uppercase tracking-widest rounded-none shadow-[0_0_20px_rgba(0,180,216,0.2)] hover:bg-white hover:shadow-[0_0_30px_rgba(0,180,216,0.4)] transition-all duration-300 disabled:opacity-50"
           >
-            {loading ? 'Initializing...' : 'Deploy to Dashboard'}
+            {loading ? 'Initializing...' : success ? 'Check Email' : 'Deploy to Dashboard'}
           </button>
         </form>
 

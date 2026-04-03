@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Plus, ChevronDown } from "lucide-react";
 
 export default function LandingPage() {
   const [daysLeft, setDaysLeft] = useState(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Target: Mid-May (May 15th) of the current year
@@ -156,9 +157,25 @@ export default function LandingPage() {
               {/* Visual abstraction */}
               <div className="w-full h-32 border border-white/5 bg-[#080808] relative overflow-hidden flex items-center justify-center">
                 <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iOCIgaGVpZ2h0PSI4IiBmaWxsPSIjMDgwODA4Ij48L3JlY3Q+CjxwYXRoIGQ9Ik0wIDBMOCA4Wk04IDBMMCA4WiIgc3Ryb2tlPSIjMTExIiBzdHJva2Utd2lkdGg9IjEiPjwvcGF0aD4KPC9zdmc+')] opacity-50" />
-                <div className="w-16 h-16 border-2 border-[#00b4d8] relative z-10 flex items-center justify-center bg-[#0a0a0a]">
+                <button 
+                  type="button"
+                  aria-label="Upload file"
+                  className="w-16 h-16 border-2 border-[#00b4d8] relative z-10 flex items-center justify-center bg-[#0a0a0a] hover:bg-[#00b4d8]/10 cursor-pointer transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
                   <Plus className="text-[#00b4d8]" />
-                </div>
+                </button>
+                <input
+                  type="file"
+                  className="hidden"
+                  ref={fileInputRef}
+                  accept=".jpg,.jpeg,.png,.webp,.pdf"
+                  onChange={(e) => {
+                    if (e.target.files && e.target.files.length > 0) {
+                      window.location.href = '/signup';
+                    }
+                  }}
+                />
               </div>
             </div>
 
