@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSideClient } from "@/lib/supabase/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import OpenAI from "openai";
 
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const openrouter = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey: process.env.OPENROUTER_API_KEY || "",
+  defaultHeaders: {
+    "HTTP-Referer": "https://schemebreaker.ai",
+    "X-Title": "SchemeBreaker AI",
+  },
+});
 
 const MARK_SCHEMES: Record<string, string> = {
   "AQA-English Language Paper 1-Q1": "4 marks. Identify and interpret explicit and implicit information and ideas. Students should list four distinct things they learn from the specified part of the source.",
@@ -23,7 +29,6 @@ export async function POST(req: NextRequest) {
     }
     const userId = user.id;
 
-    // 1. Check usage limits
     const { data: usageLimit, error: usageError } = await supabase
       .from('usage_limits')
       .select('analyses_today')
@@ -36,14 +41,13 @@ export async function POST(req: NextRequest) {
 
     const currentAnalyses = usageLimit?.analyses_today || 0;
 
-    if (currentAnalyses >= 10) { // Increased limit for testing, or keep at 3
+    if (currentAnalyses >= 10) {
       return NextResponse.json(
         { error: "You've hit your daily limit of 10 analyses." },
         { status: 403 }
       );
     }
 
-    // 2. Parse form data
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     const board = formData.get('board') as string;
@@ -54,61 +58,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // 3. Convert file to base64 for Gemini
     const arrayBuffer = await file.arrayBuffer();
     const base64Data = Buffer.from(arrayBuffer).toString('base64');
     const mimeType = file.type || 'image/jpeg';
 
-    // 4. Prepare Mark Scheme context
     const schemeKey = `${board}-${paper}-${question}`;
     const specificScheme = MARK_SCHEMES[schemeKey] || "Apply standard GCSE grading criteria for this exam board and question.";
 
-    // 5. Call Gemini Vision
     try {
-      // Use gemini-2.0-flash which supports image input
-      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-      
-      const prompt = `
-        You are an expert GCSE examiner for ${board}. 
-        Analyze the student's handwritten answer for ${paper}, ${question}.
-        
-        MARK SCHEME CONTEXT:
-        ${specificScheme}
-        
-        TASK:
-        1. Read the handwriting precisely.
-        2. Evaluate the answer against the mark scheme.
-        3. Provide specific, actionable feedback.
-        
-        OUTPUT FORMAT (Strict JSON):
-        {
-          "current_level": <number, 1-9 for GCSE grades or 1-4 for AQA levels depending on question marks>,
-          "missing_elements": "A concise paragraph explaining what was missing or what could be better",
-          "3_specific_fixes": ["Fix 1...", "Fix 2...", "Fix 3..."]
-        }
-        
-        Return ONLY the JSON object.
-      `;
+      const response = await openrouter.chat.completions.create({
+        model: "meta-llama/llama-4-scout-17b-16e-instruct-miro FREE",
+        messages: [
+          {
+            role: "system",
+            content: `You are an expert ${board} examiner. Analyze the student's handwritten answer for ${paper}, ${question}.
+            
+MARK SCHEME CONTEXT:
+${specificScheme}
 
-      const result = await model.generateContent([
-        prompt,
-        {
-          inlineData: {
-            data: base64Data,
-            mimeType: mimeType
+Respond ONLY with valid JSON in this exact format:
+{"current_level": 3, "missing_elements": "what was missing", "3_specific_fixes": ["fix1", "fix2", "fix3"]}`
+          },
+          {
+            role: "user",
+            content: [
+              { type: "text", text: "Grade this handwritten essay and respond with only JSON." },
+              {
+                type: "image_url",
+                image_url: { url: `data:${mimeType};base64,${base64Data}` }
+              }
+            ]
           }
-        }
-      ]);
+        ],
+        max_tokens: 1000,
+        temperature: 0.1,
+      });
 
-      const response = await result.response;
-      let text = response.text();
+      let text = response.choices?.[0]?.message?.content || "";
       
-      // Clean up potential markdown formatting
       text = text.replace(/```json\n?/, '').replace(/```\n?/, '').trim();
       
       const analysisResult = JSON.parse(text);
 
-      // 6. Upload to Supabase Storage (Optional but good for history)
       let publicUrl = "";
       try {
         const fileName = `${userId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
@@ -128,7 +119,6 @@ export async function POST(req: NextRequest) {
         console.error("Storage upload failed (non-critical):", uploadErr);
       }
 
-      // 7. Save to DB
       const { error: insertError } = await supabase
         .from('analyses')
         .insert({
@@ -145,7 +135,6 @@ export async function POST(req: NextRequest) {
         console.error("Failed saving analysis:", insertError);
       }
 
-      // 8. Update usage
       if (!usageLimit) {
         await supabase.from('usage_limits').insert({ user_id: userId, analyses_today: 1 });
       } else {
@@ -157,7 +146,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ result: analysisResult, image_url: publicUrl });
 
     } catch (apiError) {
-      console.error("Gemini API Error:", apiError);
+      console.error("AI API Error:", apiError);
       return NextResponse.json({ error: "AI Analysis failed. Please try a clearer image." }, { status: 500 });
     }
 
@@ -166,4 +155,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-
