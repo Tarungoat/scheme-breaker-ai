@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
 
     try {
       const response = await openrouter.chat.completions.create({
-        model: "meta-llama/llama-4-scout-17b-16e-instruct-miro FREE",
+        model: "qwen/qwen3.6-plus:free",
         messages: [
           {
             role: "system",
